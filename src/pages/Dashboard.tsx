@@ -6,34 +6,38 @@ import { Input } from "@/components/ui/input";
 import Sidebar from "@/components/Sidebar";
 import AppointmentsList from "@/components/AppointmentsList";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Dashboard = () => {
   const date = new Date();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
-      <div className="flex-1">
+      <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
         <header className="bg-white border-b">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <img
-                src="/lovable-uploads/5d486b70-1159-4c2b-bddc-790a934c8be1.png"
-                alt="Dr.Cloud Logo"
-                className="w-12 h-12 object-contain"
-              />
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  type="search"
-                  placeholder="Search (Doctor, Patient, etc.)"
-                  className="pl-10 w-[300px]"
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-4">
+                <img
+                  src="/lovable-uploads/5d486b70-1159-4c2b-bddc-790a934c8be1.png"
+                  alt="Dr.Cloud Logo"
+                  className="w-12 h-12 object-contain"
                 />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    type="search"
+                    placeholder="Search (Doctor, Patient, etc.)"
+                    className="pl-10 w-[300px]"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost">Sign Out</Button>
+              <div className="flex items-center gap-4 ml-auto">
+                <Button variant="ghost">Sign Out</Button>
+              </div>
             </div>
           </div>
         </header>

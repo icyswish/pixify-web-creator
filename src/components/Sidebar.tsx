@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Users, 
@@ -15,13 +14,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useToast } from "@/components/ui/use-toast";
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const [isStaffOpen, setIsStaffOpen] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   return (
     <>
@@ -69,28 +70,28 @@ const Sidebar = () => {
             </CollapsibleContent>
           </Collapsible>
 
-        <nav className="space-y-2">
-          <Link to="/doctors" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
-            <Users className="w-5 h-5" />
-            <span>Doctors</span>
-          </Link>
-          <Link to="/patients" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
-            <Users className="w-5 h-5" />
-            <span>Patients</span>
-          </Link>
-          <Link to="/appointments" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
-            <Calendar className="w-5 h-5" />
-            <span>Appointments</span>
-          </Link>
-          <Link to="/records" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
-            <ClipboardList className="w-5 h-5" />
-            <span>Medical Records</span>
-          </Link>
-          <Link to="/settings" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
-            <Settings className="w-5 h-5" />
-            <span>Settings</span>
-          </Link>
-        </nav>
+          <nav className="space-y-2">
+            <Link to="/doctors" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
+              <Users className="w-5 h-5" />
+              <span>Doctors</span>
+            </Link>
+            <Link to="/patients" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
+              <Users className="w-5 h-5" />
+              <span>Patients</span>
+            </Link>
+            <Link to="/appointments" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
+              <Calendar className="w-5 h-5" />
+              <span>Appointments</span>
+            </Link>
+            <Link to="/records" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
+              <ClipboardList className="w-5 h-5" />
+              <span>Medical Records</span>
+            </Link>
+            <Link to="/settings" className="flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg">
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
+            </Link>
+          </nav>
         </div>
       </div>
     </>
