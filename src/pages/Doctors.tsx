@@ -8,6 +8,7 @@ import { useSearch } from "@/contexts/SearchContext";
 import { useToast } from "@/components/ui/use-toast";
 
 const Doctors = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [doctors, setDoctors] = useState([
     {
       id: 1,
@@ -49,7 +50,7 @@ const Doctors = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1">
         <header className="bg-white border-b">

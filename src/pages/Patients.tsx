@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,6 +6,8 @@ import { Search, Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 
 const Patients = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   const patients = [
     {
       id: 1,
@@ -31,7 +34,7 @@ const Patients = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1">
         <header className="bg-white border-b">
