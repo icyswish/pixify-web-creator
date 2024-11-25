@@ -94,9 +94,6 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-4 ml-auto">
-                <Button variant="ghost">Sign Out</Button>
-              </div>
             </div>
           </div>
         </header>

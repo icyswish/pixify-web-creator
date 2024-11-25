@@ -3,9 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
-import AddButton from "@/components/AddButton";
-import { useSearch } from "@/contexts/SearchContext";
-import { useToast } from "@/components/ui/use-toast";
+import AddDoctorDialog from "@/components/AddDoctorDialog";
 
 const Doctors = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -30,24 +28,6 @@ const Doctors = () => {
     }
   ]);
 
-  const { searchTerm, setSearchTerm } = useSearch();
-  const { toast } = useToast();
-
-  const handleAddDoctor = () => {
-    const newDoctor = {
-      id: doctors.length + 1,
-      name: "New Doctor",
-      specialty: "Specialty",
-      experience: "0 years"
-    };
-    setDoctors([...doctors, newDoctor]);
-  };
-
-  const filteredDoctors = doctors.filter(doctor => 
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -56,7 +36,7 @@ const Doctors = () => {
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">Doctors Directory</h1>
-            <AddButton label="Add New Doctor" onClick={handleAddDoctor} />
+            <AddDoctorDialog />
           </div>
         </header>
 
@@ -72,15 +52,13 @@ const Doctors = () => {
                   type="search"
                   placeholder="Search by name, specialty..."
                   className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </CardContent>
           </Card>
 
           <div className="grid gap-4">
-            {filteredDoctors.map((doctor) => (
+            {doctors.map((doctor) => (
               <Card key={doctor.id} className="glass-card hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">

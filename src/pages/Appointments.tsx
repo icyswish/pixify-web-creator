@@ -1,36 +1,13 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import AddAppointmentDialog from "@/components/AddAppointmentDialog";
+import AppointmentsList from "@/components/AppointmentsList";
 
 const Appointments = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  const appointments = [
-    {
-      id: 1,
-      patientName: "John Smith",
-      time: "09:00 AM",
-      doctor: "Dr. Sarah Johnson",
-      type: "Check-up"
-    },
-    {
-      id: 2,
-      patientName: "Maria Garcia",
-      time: "10:30 AM",
-      doctor: "Dr. Michael Chen",
-      type: "Follow-up"
-    },
-    {
-      id: 3,
-      patientName: "David Wilson",
-      time: "02:00 PM",
-      doctor: "Dr. Emily Rodriguez",
-      type: "Consultation"
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -40,10 +17,7 @@ const Appointments = () => {
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">Appointments</h1>
-            <Button className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Schedule New Appointment
-            </Button>
+            <AddAppointmentDialog />
           </div>
         </header>
 
@@ -64,24 +38,7 @@ const Appointments = () => {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4">
-            {appointments.map((appointment) => (
-              <Card key={appointment.id} className="glass-card hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-semibold">{appointment.patientName}</h3>
-                      <p className="text-sm text-gray-500">{appointment.type}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{appointment.time}</p>
-                      <p className="text-sm text-gray-500">{appointment.doctor}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <AppointmentsList />
         </main>
       </div>
     </div>

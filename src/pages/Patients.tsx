@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import AddPatientDialog from "@/components/AddPatientDialog";
 
 const Patients = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  const patients = [
+  const [patients, setPatients] = useState([
     {
       id: 1,
       name: "John Smith",
@@ -30,7 +29,7 @@ const Patients = () => {
       lastVisit: "2024-02-10",
       condition: "Asthma"
     }
-  ];
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -40,10 +39,7 @@ const Patients = () => {
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">Patient Records</h1>
-            <Button className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add New Patient
-            </Button>
+            <AddPatientDialog />
           </div>
         </header>
 
