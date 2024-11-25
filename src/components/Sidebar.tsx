@@ -3,15 +3,11 @@ import {
   Users, 
   Calendar,
   Menu,
-  LayoutDashboard
+  LayoutDashboard,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,8 +15,17 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
-  const [isStaffOpen, setIsStaffOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = () => {
+    // Here you could add any cleanup logic like clearing local storage
+    toast({
+      title: "Signed out successfully",
+      description: "You have been logged out of your account.",
+    });
+    navigate('/');
+  };
 
   return (
     <>
@@ -58,6 +63,15 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
               <span>Appointments</span>
             </Link>
           </nav>
+
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-red-300 hover:text-red-400 hover:bg-red-900/20" 
+            onClick={handleSignOut}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
       </div>
     </>
