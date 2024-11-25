@@ -26,7 +26,7 @@ const Login = () => {
       <div className="w-full max-w-4xl grid md:grid-cols-2 gap-8 items-center animate-fade-in">
         <div className="text-white space-y-6">
           <img
-            src="/lovable-uploads/d1060129-3244-47c3-aff1-6a747b43c5c1.png"
+            src="/lovable-uploads/5d486b70-1159-4c2b-bddc-790a934c8be1.png"
             alt="Dr.Cloud Logo"
             className="w-32 h-32 object-contain mb-8"
           />
