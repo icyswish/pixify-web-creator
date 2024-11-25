@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useApp } from "@/contexts/AppContext";
 
 const AddDoctorDialog = () => {
   const [name, setName] = useState("");
@@ -18,9 +19,11 @@ const AddDoctorDialog = () => {
   const [type, setType] = useState("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const { addDoctor } = useApp();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addDoctor();
     toast({
       title: "Success",
       description: "Doctor has been added successfully",

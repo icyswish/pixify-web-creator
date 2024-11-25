@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useApp } from "@/contexts/AppContext";
 
 const AddAppointmentDialog = () => {
   const [name, setName] = useState("");
@@ -25,9 +26,11 @@ const AddAppointmentDialog = () => {
   const [type, setType] = useState("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const { addAppointment } = useApp();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addAppointment();
     toast({
       title: "Success",
       description: "Appointment has been scheduled successfully",

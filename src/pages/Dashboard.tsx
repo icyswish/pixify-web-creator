@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSearch } from "@/contexts/SearchContext";
+import { useApp } from "@/contexts/AppContext";
 
 const Dashboard = () => {
   const date = new Date();
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showDialog, setShowDialog] = useState(false);
   const { searchTerm, setSearchTerm } = useSearch();
+  const { state } = useApp();
 
   // Mock data for demonstration
   const mockData = {
@@ -108,7 +110,7 @@ const Dashboard = () => {
                       <CardTitle>Records of Patients</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">128</p>
+                      <p className="text-2xl font-bold">{state.totalPatients}</p>
                       <p className="text-sm text-gray-500">Total patients</p>
                     </CardContent>
                   </Card>
@@ -119,7 +121,7 @@ const Dashboard = () => {
                     <CardTitle>Scheduled Doctor</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-2xl font-bold">8</p>
+                    <p className="text-2xl font-bold">{state.onDutyDoctors}</p>
                     <p className="text-sm text-gray-500">Doctors on duty today</p>
                   </CardContent>
                 </Card>
@@ -129,7 +131,7 @@ const Dashboard = () => {
                     <CardTitle>Scheduled Nurse</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-2xl font-bold">12</p>
+                    <p className="text-2xl font-bold">{state.onDutyNurses}</p>
                     <p className="text-sm text-gray-500">Nurses on duty today</p>
                   </CardContent>
                 </Card>
@@ -139,7 +141,7 @@ const Dashboard = () => {
                     <CardTitle>Appointment Status</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-2xl font-bold">24</p>
+                    <p className="text-2xl font-bold">{state.todayAppointments}</p>
                     <p className="text-sm text-gray-500">Appointments today</p>
                   </CardContent>
                 </Card>
