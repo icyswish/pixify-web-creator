@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
+import Login from "./pages/Login";
 import { AppProvider } from "./contexts/AppContext";
 import { SearchProvider } from "./contexts/SearchContext";
 
@@ -29,6 +30,7 @@ const App = () => {
             <Router>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/doctors" element={<Doctors />} />
