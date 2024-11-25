@@ -10,6 +10,7 @@ import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
 import { AppProvider } from "./contexts/AppContext";
+import { SearchProvider } from "./contexts/SearchContext";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -22,21 +23,23 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <TooltipProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/patients" element={<Patients />} />
-              <Route path="/doctors" element={<Doctors />} />
-              <Route path="/appointments" element={<Appointments />} />
-            </Routes>
-          </Router>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </AppProvider>
+      <SearchProvider>
+        <AppProvider>
+          <TooltipProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/patients" element={<Patients />} />
+                <Route path="/doctors" element={<Doctors />} />
+                <Route path="/appointments" element={<Appointments />} />
+              </Routes>
+            </Router>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </AppProvider>
+      </SearchProvider>
     </QueryClientProvider>
   );
 };
