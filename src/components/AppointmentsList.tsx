@@ -1,25 +1,26 @@
 import { Card } from "@/components/ui/card";
+import { format } from "date-fns";
 
 const AppointmentsList = () => {
   const appointments = [
     {
       id: 1,
       patientName: "John Smith",
-      time: "09:00 AM",
+      datetime: "2024-03-20T09:00",
       doctor: "Dr. Sarah Johnson",
       type: "Check-up"
     },
     {
       id: 2,
       patientName: "Maria Garcia",
-      time: "10:30 AM",
+      datetime: "2024-03-20T10:30",
       doctor: "Dr. Michael Chen",
       type: "Follow-up"
     },
     {
       id: 3,
       patientName: "David Wilson",
-      time: "02:00 PM",
+      datetime: "2024-03-21T14:00",
       doctor: "Dr. Emily Rodriguez",
       type: "Consultation"
     }
@@ -35,7 +36,12 @@ const AppointmentsList = () => {
               <p className="text-sm text-gray-500">{appointment.type}</p>
             </div>
             <div className="text-right">
-              <p className="font-medium">{appointment.time}</p>
+              <p className="font-medium">
+                {format(new Date(appointment.datetime), "EEEE, MMM d")}
+              </p>
+              <p className="text-sm text-gray-500">
+                {format(new Date(appointment.datetime), "h:mm a")}
+              </p>
               <p className="text-sm text-gray-500">{appointment.doctor}</p>
             </div>
           </div>
