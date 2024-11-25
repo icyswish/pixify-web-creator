@@ -22,7 +22,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 p-4 font-inter">
       <div className="w-full max-w-4xl grid md:grid-cols-2 gap-8 items-center animate-fade-in">
         <div className="text-white space-y-6">
           <img

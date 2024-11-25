@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import AddButton from "@/components/AddButton";
+import { useSearch } from "@/contexts/SearchContext";
+import { useToast } from "@/components/ui/use-toast";
 
 const Doctors = () => {
-  const doctors = [
+  const [doctors, setDoctors] = useState([
     {
       id: 1,
       name: "Dr. Sarah Johnson",
@@ -24,7 +27,25 @@ const Doctors = () => {
       specialty: "Neurologist",
       experience: "12 years"
     }
-  ];
+  ]);
+
+  const { searchTerm, setSearchTerm } = useSearch();
+  const { toast } = useToast();
+
+  const handleAddDoctor = () => {
+    const newDoctor = {
+      id: doctors.length + 1,
+      name: "New Doctor",
+      specialty: "Specialty",
+      experience: "0 years"
+    };
+    setDoctors([...doctors, newDoctor]);
+  };
+
+  const filteredDoctors = doctors.filter(doctor => 
+    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -34,10 +55,7 @@ const Doctors = () => {
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold">Doctors Directory</h1>
-            <Button className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add New Doctor
-            </Button>
+            <AddButton label="Add New Doctor" onClick={handleAddDoctor} />
           </div>
         </header>
 
@@ -53,13 +71,15 @@ const Doctors = () => {
                   type="search"
                   placeholder="Search by name, specialty..."
                   className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </CardContent>
           </Card>
 
           <div className="grid gap-4">
-            {doctors.map((doctor) => (
+            {filteredDoctors.map((doctor) => (
               <Card key={doctor.id} className="glass-card hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
