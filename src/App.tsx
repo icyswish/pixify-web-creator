@@ -9,28 +9,38 @@ import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
+import { useState } from "react";
 
-const queryClient = new QueryClient();
+const App = () => {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,
+        retry: 1,
+      },
+    },
+  }));
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SearchProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/doctors" element={<Doctors />} />
-            <Route path="/appointments" element={<Appointments />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </SearchProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SearchProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/patients" element={<Patients />} />
+              <Route path="/doctors" element={<Doctors />} />
+              <Route path="/appointments" element={<Appointments />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SearchProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
