@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import Sidebar from "@/components/Sidebar";
 import AddPatientDialog from "@/components/AddPatientDialog";
 
 const Patients = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { toast } = useToast();
   const [patients, setPatients] = useState([
     {
       id: 1,
@@ -30,6 +33,14 @@ const Patients = () => {
       condition: "Asthma"
     }
   ]);
+
+  const handleDelete = (id: number) => {
+    // Here you would typically make an API call to delete the patient
+    toast({
+      title: "Patient removed",
+      description: "The patient has been successfully removed from the system.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -69,9 +80,18 @@ const Patients = () => {
                       <h3 className="text-lg font-semibold">{patient.name}</h3>
                       <p className="text-sm text-gray-500">Age: {patient.age}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Last Visit: {patient.lastVisit}</p>
-                      <p className="text-sm font-medium text-primary">{patient.condition}</p>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Last Visit: {patient.lastVisit}</p>
+                        <p className="text-sm font-medium text-primary">{patient.condition}</p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleDelete(patient.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

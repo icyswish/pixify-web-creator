@@ -1,7 +1,11 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
 
 const AppointmentsList = () => {
+  const { toast } = useToast();
   const appointments = [
     {
       id: 1,
@@ -26,6 +30,14 @@ const AppointmentsList = () => {
     }
   ];
 
+  const handleDelete = (id: number) => {
+    // Here you would typically make an API call to delete the appointment
+    toast({
+      title: "Appointment deleted",
+      description: "The appointment has been successfully deleted.",
+    });
+  };
+
   return (
     <div className="space-y-4">
       {appointments.map((appointment) => (
@@ -35,14 +47,23 @@ const AppointmentsList = () => {
               <h3 className="font-medium">{appointment.patientName}</h3>
               <p className="text-sm text-gray-500">{appointment.type}</p>
             </div>
-            <div className="text-right">
-              <p className="font-medium">
-                {format(new Date(appointment.datetime), "EEEE, MMM d")}
-              </p>
-              <p className="text-sm text-gray-500">
-                {format(new Date(appointment.datetime), "h:mm a")}
-              </p>
-              <p className="text-sm text-gray-500">{appointment.doctor}</p>
+            <div className="text-right flex items-center gap-4">
+              <div>
+                <p className="font-medium">
+                  {format(new Date(appointment.datetime), "EEEE, MMM d")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {format(new Date(appointment.datetime), "h:mm a")}
+                </p>
+                <p className="text-sm text-gray-500">{appointment.doctor}</p>
+              </div>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => handleDelete(appointment.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </Card>

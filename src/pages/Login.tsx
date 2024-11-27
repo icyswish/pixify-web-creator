@@ -12,11 +12,17 @@ const Login = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username && password) {
+    if (username === "admin" && password === "admin") {
       navigate("/dashboard");
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
+      });
+    } else {
+      toast({
+        title: "Failed login attempt",
+        description: "Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -64,14 +70,6 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 px-4 bg-white/50 backdrop-blur-sm border-white/20"
               />
-            </div>
-            <div className="text-right">
-              <a
-                href="#"
-                className="text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                Forgot password?
-              </a>
             </div>
             <Button type="submit" className="w-full h-12 text-lg bg-primary hover:bg-primary/90">
               Login
