@@ -14,6 +14,10 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { searchTerm, setSearchTerm } = useSearch();
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -29,7 +33,7 @@ const Dashboard = () => {
                   placeholder="Search (Doctor, Patient, etc.)"
                   className="pl-10"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearch}
                 />
               </div>
             </div>
