@@ -12,6 +12,7 @@ import Appointments from "./pages/Appointments";
 import { AppProvider } from "./contexts/AppContext";
 import { SearchProvider } from "./contexts/SearchContext";
 import { supabase } from "./integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -33,6 +34,9 @@ const App = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
+      if (event === 'SIGNED_OUT') {
+        window.location.href = '/';
+      }
     });
 
     return () => subscription.unsubscribe();

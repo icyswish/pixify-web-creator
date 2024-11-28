@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AppState {
   totalPatients: number;
@@ -19,12 +20,43 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>({
-    totalPatients: 128,
-    totalDoctors: 15,
-    todayAppointments: 24,
-    onDutyDoctors: 8,
+    totalPatients: 0,
+    totalDoctors: 0,
+    todayAppointments: 0,
+    onDutyDoctors: 0,
     onDutyNurses: 12,
   });
+
+  useEffect(() => {
+    fetchCounts();
+  }, []);
+
+  const fetchCounts = async () => {
+    const { data: patients } = await supabase
+      .from('patients')
+      .select('id');
+    
+    const { data: doctors } = await supabase
+      .from('doctors')
+      .select('id');
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const { data: appointments } = await supabase
+      .from('appointments')
+      .select('id')
+      .gte('datetime', today.toISOString())
+      .lt('datetime', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString());
+
+    setState(prev => ({
+      ...prev,
+      totalPatients: patients?.length || 0,
+      totalDoctors: doctors?.length || 0,
+      todayAppointments: appointments?.length || 0,
+      onDutyDoctors: doctors?.length || 0,
+    }));
+  };
 
   const addPatient = () => {
     setState(prev => ({

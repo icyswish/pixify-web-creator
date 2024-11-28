@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useApp } from "@/contexts/AppContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const AddPatientDialog = () => {
   const [name, setName] = useState("");
@@ -19,16 +19,41 @@ const AddPatientDialog = () => {
   const [disease, setDisease] = useState("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const { addPatient } = useApp();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addPatient();
+    
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session?.user.id) return;
+
+    const { error } = await supabase
+      .from('patients')
+      .insert([
+        { 
+          name,
+          age: parseInt(age),
+          disease,
+          created_by: session.session.user.id
+        }
+      ]);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add patient. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Success",
       description: "Patient has been added successfully",
     });
     setOpen(false);
+    setName("");
+    setAge("");
+    setDisease("");
   };
 
   return (

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useApp } from "@/contexts/AppContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const AddAppointmentDialog = () => {
   const [name, setName] = useState("");
@@ -26,16 +26,41 @@ const AddAppointmentDialog = () => {
   const [type, setType] = useState("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const { addAppointment } = useApp();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addAppointment();
+    
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session?.user.id) return;
+
+    const { error } = await supabase
+      .from('appointments')
+      .insert([
+        { 
+          patient_name: name,
+          datetime,
+          type,
+          created_by: session.session.user.id
+        }
+      ]);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to schedule appointment. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Success",
       description: "Appointment has been scheduled successfully",
     });
     setOpen(false);
+    setName("");
+    setDatetime("");
+    setType("");
   };
 
   return (

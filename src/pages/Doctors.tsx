@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,37 +6,61 @@ import { Search, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Sidebar from "@/components/Sidebar";
 import AddDoctorDialog from "@/components/AddDoctorDialog";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Doctor {
+  id: string;
+  name: string;
+  experience: string;
+  type: string;
+}
 
 const Doctors = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
-  const [doctors, setDoctors] = useState([
-    {
-      id: 1,
-      name: "Dr. Sarah Johnson",
-      specialty: "Cardiologist",
-      experience: "15 years"
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Chen",
-      specialty: "Pediatrician",
-      experience: "10 years"
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Rodriguez",
-      specialty: "Neurologist",
-      experience: "12 years"
-    }
-  ]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
 
-  const handleDelete = (id: number) => {
-    // Here you would typically make an API call to delete the doctor
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    const { data, error } = await supabase
+      .from('doctors')
+      .select('*');
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch doctors",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setDoctors(data || []);
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('doctors')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete doctor",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Doctor removed",
       description: "The doctor has been successfully removed from the system.",
     });
+    fetchDoctors();
   };
 
   return (
@@ -75,7 +99,7 @@ const Doctors = () => {
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-lg font-semibold">{doctor.name}</h3>
-                      <p className="text-sm text-gray-500">{doctor.specialty}</p>
+                      <p className="text-sm text-gray-500">{doctor.type}</p>
                     </div>
                     <div className="flex items-center gap-4">
                       <p className="text-sm text-gray-500">Experience: {doctor.experience}</p>

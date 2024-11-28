@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,40 +6,61 @@ import { Search, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Sidebar from "@/components/Sidebar";
 import AddPatientDialog from "@/components/AddPatientDialog";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  disease: string;
+}
 
 const Patients = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
-  const [patients, setPatients] = useState([
-    {
-      id: 1,
-      name: "John Smith",
-      age: 45,
-      lastVisit: "2024-02-15",
-      condition: "Hypertension"
-    },
-    {
-      id: 2,
-      name: "Maria Garcia",
-      age: 32,
-      lastVisit: "2024-02-14",
-      condition: "Diabetes Type 2"
-    },
-    {
-      id: 3,
-      name: "David Wilson",
-      age: 28,
-      lastVisit: "2024-02-10",
-      condition: "Asthma"
-    }
-  ]);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
-  const handleDelete = (id: number) => {
-    // Here you would typically make an API call to delete the patient
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*');
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch patients",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setPatients(data || []);
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete patient",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Patient removed",
       description: "The patient has been successfully removed from the system.",
     });
+    fetchPatients();
   };
 
   return (
@@ -82,8 +103,7 @@ const Patients = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm text-gray-500">Last Visit: {patient.lastVisit}</p>
-                        <p className="text-sm font-medium text-primary">{patient.condition}</p>
+                        <p className="text-sm font-medium text-primary">{patient.disease}</p>
                       </div>
                       <Button
                         variant="destructive"

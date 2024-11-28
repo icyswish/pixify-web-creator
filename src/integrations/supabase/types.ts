@@ -9,6 +9,87 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          created_by: string
+          datetime: string
+          id: string
+          patient_name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          datetime: string
+          id?: string
+          patient_name: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          datetime?: string
+          id?: string
+          patient_name?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      doctors: {
+        Row: {
+          created_at: string
+          created_by: string
+          experience: string
+          id: string
+          name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          experience: string
+          id?: string
+          name: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          experience?: string
+          id?: string
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      patients: {
+        Row: {
+          age: number
+          created_at: string
+          created_by: string
+          disease: string
+          id: string
+          name: string
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          created_by: string
+          disease: string
+          id?: string
+          name: string
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          created_by?: string
+          disease?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
