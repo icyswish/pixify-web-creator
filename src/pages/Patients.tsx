@@ -12,7 +12,6 @@ interface Patient {
   id: string;
   name: string;
   age: number;
-  disease: string;
 }
 
 const Patients = () => {
@@ -85,7 +84,7 @@ const Patients = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="search"
-                  placeholder="Search by name, condition..."
+                  placeholder="Search by name..."
                   className="pl-10"
                 />
               </div>
@@ -102,9 +101,6 @@ const Patients = () => {
                       <p className="text-sm text-gray-500">Age: {patient.age}</p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-primary">{patient.disease}</p>
-                      </div>
                       <Button
                         variant="destructive"
                         size="icon"

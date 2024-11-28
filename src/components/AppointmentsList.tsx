@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { format, utcToZonedTime } from "date-fns-tz";
+import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -82,10 +82,10 @@ const AppointmentsList = () => {
   };
 
   const formatDateTime = (datetime: string) => {
-    const zonedTime = utcToZonedTime(new Date(datetime), timeZone);
+    const date = new Date(datetime);
     return {
-      date: format(zonedTime, "EEEE, MMM d", { timeZone }),
-      time: format(zonedTime, "h:mm a", { timeZone })
+      date: format(date, "EEEE, MMM d"),
+      time: format(date, "h:mm a")
     };
   };
 
