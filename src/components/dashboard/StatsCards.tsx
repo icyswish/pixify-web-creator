@@ -5,11 +5,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+
+interface Doctor {
+  id: string;
+  name: string;
+  experience: string;
+  type: string;
+}
+
+interface Appointment {
+  id: string;
+  patient_name: string;
+  datetime: string;
+  type: string;
+}
 
 export const StatsCards = () => {
   const { state } = useApp();
@@ -17,48 +33,54 @@ export const StatsCards = () => {
   const [showAppointmentsDialog, setShowAppointmentsDialog] = useState(false);
   const [showPatientsDialog, setShowPatientsDialog] = useState(false);
   const { toast } = useToast();
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  const patients = [
-    { id: 1, name: "John Smith", age: 45, lastVisit: "2024-02-15", condition: "Hypertension" },
-    { id: 2, name: "Maria Garcia", age: 32, lastVisit: "2024-02-14", condition: "Diabetes Type 2" },
-    { id: 3, name: "David Wilson", age: 28, lastVisit: "2024-02-10", condition: "Asthma" }
-  ];
+  useEffect(() => {
+    fetchData();
+    const subscription = supabase
+      .channel('appointments_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        fetchData();
+      })
+      .subscribe();
 
-  const onDutyDoctors = [
-    { id: 1, name: "Dr. Sarah Johnson", specialty: "Cardiologist" },
-    { id: 2, name: "Dr. Michael Chen", specialty: "Pediatrician" },
-    { id: 3, name: "Dr. Emily Rodriguez", specialty: "Neurologist" },
-  ];
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
-  const appointments = [
-    {
-      id: 1,
-      patientName: "John Smith",
-      datetime: "2024-03-20T09:00",
-      doctor: "Dr. Sarah Johnson",
-      type: "Check-up"
-    },
-    {
-      id: 2,
-      patientName: "Maria Garcia",
-      datetime: "2024-03-20T10:30",
-      doctor: "Dr. Michael Chen",
-      type: "Follow-up"
-    },
-    {
-      id: 3,
-      patientName: "David Wilson",
-      datetime: "2024-03-21T14:00",
-      doctor: "Dr. Emily Rodriguez",
-      type: "Consultation"
-    }
-  ];
+  const fetchData = async () => {
+    // Fetch total patients
+    const { count: patientsCount } = await supabase
+      .from('patients')
+      .select('*', { count: 'exact' });
+    setTotalPatients(patientsCount || 0);
 
-  const handleDelete = (type: string, id: number) => {
-    toast({
-      title: `${type} deleted`,
-      description: `The ${type.toLowerCase()} has been successfully deleted.`,
-    });
+    // Fetch doctors
+    const { data: doctorsData } = await supabase
+      .from('doctors')
+      .select('*');
+    setDoctors(doctorsData || []);
+
+    // Fetch today's appointments
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const { data: appointmentsData } = await supabase
+      .from('appointments')
+      .select('*')
+      .gte('datetime', today.toISOString())
+      .lt('datetime', tomorrow.toISOString())
+      .order('datetime', { ascending: true });
+    setAppointments(appointmentsData || []);
+  };
+
+  const isAppointmentFinished = (datetime: string) => {
+    return new Date(datetime) < new Date();
   };
 
   return (
@@ -71,7 +93,7 @@ export const StatsCards = () => {
           <CardTitle>Records of Patients</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{state.totalPatients}</p>
+          <p className="text-2xl font-bold">{totalPatients}</p>
           <p className="text-sm text-gray-500">Total patients</p>
         </CardContent>
       </Card>
@@ -84,8 +106,8 @@ export const StatsCards = () => {
           <CardTitle>Scheduled Doctor</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{state.onDutyDoctors}</p>
-          <p className="text-sm text-gray-500">Doctors on duty today</p>
+          <p className="text-2xl font-bold">{doctors.length}</p>
+          <p className="text-sm text-gray-500">Doctors available</p>
         </CardContent>
       </Card>
 
@@ -97,7 +119,7 @@ export const StatsCards = () => {
           <CardTitle>Appointment Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{state.todayAppointments}</p>
+          <p className="text-2xl font-bold">{appointments.length}</p>
           <p className="text-sm text-gray-500">Appointments today</p>
         </CardContent>
       </Card>
@@ -105,49 +127,25 @@ export const StatsCards = () => {
       <Dialog open={showPatientsDialog} onOpenChange={setShowPatientsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Patient Records</DialogTitle>
+            <DialogTitle>Total Patients: {totalPatients}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            {patients.map((patient) => (
-              <div key={patient.id} className="p-4 border rounded-lg flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{patient.name}</p>
-                  <p className="text-sm text-gray-500">Age: {patient.age}</p>
-                  <p className="text-sm text-gray-500">Last Visit: {patient.lastVisit}</p>
-                  <p className="text-sm text-gray-500">{patient.condition}</p>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDelete('Patient', patient.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+          <p className="text-center text-gray-500">
+            There are currently {totalPatients} patients registered in the system.
+          </p>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showDoctorsDialog} onOpenChange={setShowDoctorsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Doctors on Duty Today</DialogTitle>
+            <DialogTitle>Available Doctors</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {onDutyDoctors.map((doctor) => (
-              <div key={doctor.id} className="p-4 border rounded-lg flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{doctor.name}</p>
-                  <p className="text-sm text-gray-500">{doctor.specialty}</p>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDelete('Doctor', doctor.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+            {doctors.map((doctor) => (
+              <div key={doctor.id} className="p-4 border rounded-lg">
+                <h3 className="font-medium">{doctor.name}</h3>
+                <p className="text-sm text-gray-500">{doctor.type}</p>
+                <p className="text-sm text-gray-500">Experience: {doctor.experience}</p>
               </div>
             ))}
           </div>
@@ -157,30 +155,37 @@ export const StatsCards = () => {
       <Dialog open={showAppointmentsDialog} onOpenChange={setShowAppointmentsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Today's Appointments</DialogTitle>
+            <DialogTitle>Today's Appointments Status</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {appointments.map((appointment) => (
-              <div key={appointment.id} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{appointment.patientName}</p>
-                    <p className="text-sm text-gray-500">{appointment.type}</p>
-                    <p className="text-sm text-gray-500">{appointment.doctor}</p>
+            <div className="space-y-2">
+              <h3 className="font-medium">Finished Appointments</h3>
+              {appointments
+                .filter(app => isAppointmentFinished(app.datetime))
+                .map((appointment) => (
+                  <div key={appointment.id} className="p-4 border rounded-lg bg-gray-50">
+                    <h4 className="font-medium">{appointment.patient_name}</h4>
                     <p className="text-sm text-gray-500">
-                      {new Date(appointment.datetime).toLocaleString()}
+                      {format(new Date(appointment.datetime), 'h:mm a')}
                     </p>
+                    <p className="text-sm text-gray-500">{appointment.type}</p>
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDelete('Appointment', appointment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                ))}
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-medium">Upcoming Appointments</h3>
+              {appointments
+                .filter(app => !isAppointmentFinished(app.datetime))
+                .map((appointment) => (
+                  <div key={appointment.id} className="p-4 border rounded-lg">
+                    <h4 className="font-medium">{appointment.patient_name}</h4>
+                    <p className="text-sm text-gray-500">
+                      {format(new Date(appointment.datetime), 'h:mm a')}
+                    </p>
+                    <p className="text-sm text-gray-500">{appointment.type}</p>
+                  </div>
+                ))}
+            </div>
           </div>
         </DialogContent>
       </Dialog>

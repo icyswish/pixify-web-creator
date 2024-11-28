@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,8 +19,16 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSignOut = () => {
-    // Here you could add any cleanup logic like clearing local storage
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
+    }
     toast({
       title: "Signed out successfully",
       description: "You have been logged out of your account.",
