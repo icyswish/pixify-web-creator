@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,14 +8,62 @@ import Sidebar from "@/components/Sidebar";
 import AppointmentsList from "@/components/AppointmentsList";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { useSearch } from "@/contexts/SearchContext";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SearchResult {
+  id: string;
+  name?: string;
+  patient_name?: string;
+  type?: string;
+  source: 'doctor' | 'patient' | 'appointment';
+}
 
 const Dashboard = () => {
   const date = new Date();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { searchTerm, setSearchTerm } = useSearch();
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      searchAllData();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchTerm]);
+
+  const searchAllData = async () => {
+    const searchLower = searchTerm.toLowerCase();
+
+    // Search doctors
+    const { data: doctors } = await supabase
+      .from('doctors')
+      .select('*')
+      .ilike('name', `%${searchLower}%`);
+
+    // Search patients
+    const { data: patients } = await supabase
+      .from('patients')
+      .select('*')
+      .ilike('name', `%${searchLower}%`);
+
+    // Search appointments
+    const { data: appointments } = await supabase
+      .from('appointments')
+      .select('*')
+      .ilike('patient_name', `%${searchLower}%`);
+
+    const results: SearchResult[] = [
+      ...(doctors?.map(d => ({ ...d, source: 'doctor' as const })) || []),
+      ...(patients?.map(p => ({ ...p, source: 'patient' as const })) || []),
+      ...(appointments?.map(a => ({ ...a, name: a.patient_name, source: 'appointment' as const })) || [])
+    ];
+
+    setSearchResults(results);
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value.toLowerCase());
+    setSearchTerm(e.target.value);
   };
 
   return (
@@ -30,11 +78,21 @@ const Dashboard = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="search"
-                  placeholder="Search (Doctor, Patient, etc.)"
+                  placeholder="Search doctors, patients, appointments..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={handleSearch}
                 />
+                {searchResults.length > 0 && searchTerm && (
+                  <div className="absolute w-full bg-white mt-1 rounded-md shadow-lg border p-2 space-y-2 max-h-60 overflow-auto z-50">
+                    {searchResults.map((result) => (
+                      <div key={`${result.source}-${result.id}`} className="p-2 hover:bg-gray-100 rounded">
+                        <p className="font-medium">{result.name || result.patient_name}</p>
+                        <p className="text-sm text-gray-500 capitalize">{result.source}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

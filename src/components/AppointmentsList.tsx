@@ -16,12 +16,10 @@ interface Appointment {
 const AppointmentsList = () => {
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const timeZone = 'Asia/Manila';
 
   useEffect(() => {
     fetchAppointments();
     
-    // Subscribe to realtime changes
     const channel = supabase
       .channel('appointments_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
@@ -83,6 +81,8 @@ const AppointmentsList = () => {
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime);
+    // Add 8 hours for GMT+8
+    date.setHours(date.getHours() + 8);
     return {
       date: format(date, "EEEE, MMM d"),
       time: format(date, "h:mm a")

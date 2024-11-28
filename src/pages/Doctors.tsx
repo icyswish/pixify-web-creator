@@ -19,10 +19,24 @@ const Doctors = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [searchResults, setSearchResults] = useState<Doctor[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchDoctors();
   }, []);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = doctors.filter(doctor => 
+        doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor.type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults(doctors);
+    }
+  }, [searchTerm, doctors]);
 
   const fetchDoctors = async () => {
     const { data, error } = await supabase
@@ -39,6 +53,7 @@ const Doctors = () => {
     }
 
     setDoctors(data || []);
+    setSearchResults(data || []);
   };
 
   const handleDelete = async (id: string) => {
@@ -87,13 +102,15 @@ const Doctors = () => {
                   type="search"
                   placeholder="Search by name, specialty..."
                   className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </CardContent>
           </Card>
 
           <div className="grid gap-4">
-            {doctors.map((doctor) => (
+            {searchResults.map((doctor) => (
               <Card key={doctor.id} className="glass-card hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
