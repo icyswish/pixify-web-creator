@@ -68,7 +68,6 @@ export type Database = {
           age: number
           created_at: string
           created_by: string
-          disease: string
           id: string
           name: string
         }
@@ -76,7 +75,6 @@ export type Database = {
           age: number
           created_at?: string
           created_by: string
-          disease: string
           id?: string
           name: string
         }
@@ -84,7 +82,6 @@ export type Database = {
           age?: number
           created_at?: string
           created_by?: string
-          disease?: string
           id?: string
           name?: string
         }

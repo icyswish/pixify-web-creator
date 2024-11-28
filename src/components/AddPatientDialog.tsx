@@ -16,7 +16,6 @@ import { supabase } from "@/integrations/supabase/client";
 const AddPatientDialog = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  const [disease, setDisease] = useState("");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
@@ -32,7 +31,6 @@ const AddPatientDialog = () => {
         { 
           name,
           age: parseInt(age),
-          disease,
           created_by: session.session.user.id
         }
       ]);
@@ -53,7 +51,6 @@ const AddPatientDialog = () => {
     setOpen(false);
     setName("");
     setAge("");
-    setDisease("");
   };
 
   return (
@@ -85,15 +82,6 @@ const AddPatientDialog = () => {
               type="number"
               value={age}
               onChange={(e) => setAge(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="disease">Type of Disease</Label>
-            <Input
-              id="disease"
-              value={disease}
-              onChange={(e) => setDisease(e.target.value)}
               required
             />
           </div>

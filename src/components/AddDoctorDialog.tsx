@@ -9,9 +9,33 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+const doctorTypes = [
+  "Cardiologist",
+  "Dermatologist",
+  "Endocrinologist",
+  "Gastroenterologist",
+  "General Practitioner",
+  "Neurologist",
+  "Obstetrician/Gynecologist",
+  "Ophthalmologist",
+  "Orthopedist",
+  "Pediatrician",
+  "Psychiatrist",
+  "Pulmonologist",
+  "Surgeon",
+  "Urologist"
+];
 
 const AddDoctorDialog = () => {
   const [name, setName] = useState("");
@@ -89,12 +113,18 @@ const AddDoctorDialog = () => {
           </div>
           <div>
             <Label htmlFor="type">Type of Doctor</Label>
-            <Input
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              required
-            />
+            <Select value={type} onValueChange={setType} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Select specialization" />
+              </SelectTrigger>
+              <SelectContent>
+                {doctorTypes.map((doctorType) => (
+                  <SelectItem key={doctorType} value={doctorType.toLowerCase()}>
+                    {doctorType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" className="w-full">Add Doctor</Button>
         </form>
