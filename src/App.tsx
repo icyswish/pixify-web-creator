@@ -12,29 +12,29 @@ import Appointments from "./pages/Appointments";
 import { AppProvider } from "./contexts/AppContext";
 import { SearchProvider } from "./contexts/SearchContext";
 import { supabase } from "./integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 5 * 1000,
+        retry: false,
       },
     },
   }));
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-    });
+    checkUser();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setIsAuthenticated(!!session);
       if (event === 'SIGNED_OUT') {
+        queryClient.clear();
         window.location.href = '/';
       }
     });
@@ -42,9 +42,20 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    } catch (error) {
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Protected Route component
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    if (isAuthenticated === null) {
+    if (isLoading) {
       return <div>Loading...</div>;
     }
     
@@ -54,6 +65,10 @@ const App = () => {
 
     return <>{children}</>;
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
