@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/Sidebar";
 import AddPatientDialog from "@/components/AddPatientDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,7 @@ const Patients = () => {
 
   useEffect(() => {
     fetchPatients();
+    document.title = "Patients | Dr Cloud Management";
   }, []);
 
   useEffect(() => {
@@ -54,9 +56,27 @@ const Patients = () => {
     setSearchResults(data || []);
   };
 
-  useEffect(() => {
-    document.title = "Patients | Dr Cloud";
-  }, []);
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete patient",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Patient deleted successfully",
+    });
+    fetchPatients();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -97,10 +117,17 @@ const Patients = () => {
                     <h3 className="font-medium">{patient.name}</h3>
                     <p className="text-sm text-gray-500">Age: {patient.age}</p>
                   </div>
-                  <div>
+                  <div className="flex items-center gap-4">
                     <p className="text-sm text-gray-500">
                       {new Date(patient.created_at).toLocaleDateString()}
                     </p>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDelete(patient.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </Card>

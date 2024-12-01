@@ -73,8 +73,8 @@ const AppointmentsList = () => {
     }
 
     toast({
-      title: "Appointment deleted",
-      description: "The appointment has been successfully deleted.",
+      title: "Success",
+      description: "Appointment deleted successfully",
     });
     fetchAppointments();
   };
