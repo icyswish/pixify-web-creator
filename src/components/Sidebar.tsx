@@ -48,7 +48,15 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       </Button>
 
       <div className={`w-64 bg-primary text-white min-h-screen p-4 fixed left-0 top-0 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="space-y-8 mt-16">
+        <div className="flex items-center justify-center mb-8 mt-16">
+          <img 
+            src="/lovable-uploads/92bbc203-c641-4fd1-8ec4-d7f9898186a9.png" 
+            alt="Dr Cloud Logo" 
+            className="h-12 w-auto"
+          />
+        </div>
+
+        <div className="space-y-8">
           <Button 
             variant="ghost" 
             className="w-full justify-start" 

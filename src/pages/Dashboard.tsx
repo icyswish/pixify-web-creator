@@ -25,7 +25,7 @@ const Dashboard = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
-    document.title = "Dashboard | Dr Cloud";
+    document.title = "Dashboard | Dr Cloud Management";
   }, []);
 
   useEffect(() => {
@@ -77,10 +77,18 @@ const Dashboard = () => {
       <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
         <header className="bg-white border-b">
           <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <img 
+                src="/lovable-uploads/92bbc203-c641-4fd1-8ec4-d7f9898186a9.png" 
+                alt="Dr Cloud Logo" 
+                className="h-8 w-auto"
+              />
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+            </div>
             <div className="flex items-center gap-8">
               <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
+                <Input
                   type="search"
                   placeholder="Search doctors, patients, appointments..."
                   className="pl-10"

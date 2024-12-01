@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Cloud, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
@@ -13,6 +13,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    document.title = "Login | Dr Cloud Management";
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,11 +38,45 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password reset instructions have been sent to your email",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Login to Dr Cloud</CardTitle>
+          <div className="flex justify-center items-center gap-2 mb-4">
+            <img 
+              src="/lovable-uploads/92bbc203-c641-4fd1-8ec4-d7f9898186a9.png" 
+              alt="Dr Cloud Logo" 
+              className="h-12 w-auto"
+            />
+          </div>
+          <CardTitle className="text-2xl font-bold">Login to Dr Cloud Management</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
@@ -70,6 +108,18 @@ const Login = () => {
                   <Eye className="h-4 w-4 text-gray-500" />
                 )}
               </button>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+              <Link to="/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
             </div>
             <Button type="submit" className="w-full">
               Sign in

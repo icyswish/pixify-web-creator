@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, subHours } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -81,24 +81,15 @@ const AppointmentsList = () => {
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime);
-    // Convert to Philippines timezone (UTC+8)
-    const options = {
-      timeZone: 'Asia/Manila',
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    } as Intl.DateTimeFormatOptions;
+    // Subtract 8 hours for Philippines timezone
+    const adjustedDate = subHours(date, 8);
     
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const formattedDate = formatter.format(date);
-    const [dayOfWeek, month, day, time] = formattedDate.split(', ');
+    const formattedDate = format(adjustedDate, 'EEEE, MMM d');
+    const formattedTime = format(adjustedDate, 'h:mm a');
     
     return {
-      date: `${dayOfWeek}, ${month} ${day}`,
-      time: time
+      date: formattedDate,
+      time: formattedTime
     };
   };
 
