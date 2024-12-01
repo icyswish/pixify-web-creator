@@ -33,12 +33,16 @@ const AddAppointmentDialog = () => {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session?.user.id) return;
 
+    // Convert the local datetime to UTC before storing
+    const localDate = new Date(datetime);
+    const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+
     const { error } = await supabase
       .from('appointments')
       .insert([
         { 
           patient_name: name,
-          datetime,
+          datetime: utcDate.toISOString(),
           type,
           created_by: session.session.user.id
         }
