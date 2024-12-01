@@ -19,6 +19,7 @@ import {
 import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { subHours } from "date-fns";
 
 const AddAppointmentDialog = () => {
   const [name, setName] = useState("");
@@ -33,9 +34,10 @@ const AddAppointmentDialog = () => {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session?.user.id) return;
 
-    // Convert the local datetime to UTC before storing
+    // Convert the local datetime to UTC and subtract 8 hours
     const localDate = new Date(datetime);
-    const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+    const adjustedDate = subHours(localDate, 8);
+    const utcDate = new Date(adjustedDate.getTime() - adjustedDate.getTimezoneOffset() * 60000);
 
     const { error } = await supabase
       .from('appointments')
