@@ -78,6 +78,10 @@ const Doctors = () => {
     fetchDoctors();
   };
 
+  useEffect(() => {
+    document.title = "Doctors | Dr Cloud";
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Trash2 } from "lucide-react";
+import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import AddPatientDialog from "@/components/AddPatientDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,7 @@ interface Patient {
   id: string;
   name: string;
   age: number;
+  created_at: string;
 }
 
 const Patients = () => {
@@ -28,8 +28,7 @@ const Patients = () => {
   useEffect(() => {
     if (searchTerm) {
       const filtered = patients.filter(patient => 
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.age.toString().includes(searchTerm)
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setSearchResults(filtered);
     } else {
@@ -55,27 +54,9 @@ const Patients = () => {
     setSearchResults(data || []);
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('patients')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete patient",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Patient removed",
-      description: "The patient has been successfully removed from the system.",
-    });
-    fetchPatients();
-  };
+  useEffect(() => {
+    document.title = "Patients | Dr Cloud";
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -99,7 +80,7 @@ const Patients = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="search"
-                  placeholder="Search by name or age..."
+                  placeholder="Search by patient name..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -108,24 +89,20 @@ const Patients = () => {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4">
+          <div className="space-y-4">
             {searchResults.map((patient) => (
-              <Card key={patient.id} className="glass-card hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-semibold">{patient.name}</h3>
-                      <p className="text-sm text-gray-500">Age: {patient.age}</p>
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleDelete(patient.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              <Card key={patient.id} className="p-4 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">{patient.name}</h3>
+                    <p className="text-sm text-gray-500">Age: {patient.age}</p>
                   </div>
-                </CardContent>
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      {new Date(patient.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
               </Card>
             ))}
           </div>

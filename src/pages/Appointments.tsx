@@ -56,6 +56,10 @@ const Appointments = () => {
     setSearchResults(data || []);
   };
 
+  useEffect(() => {
+    document.title = "Appointments | Dr Cloud";
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />

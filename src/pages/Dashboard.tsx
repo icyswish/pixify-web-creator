@@ -25,6 +25,10 @@ const Dashboard = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
+    document.title = "Dashboard | Dr Cloud";
+  }, []);
+
+  useEffect(() => {
     if (searchTerm) {
       searchAllData();
     } else {
@@ -76,7 +80,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-8">
               <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
+              <Input
                   type="search"
                   placeholder="Search doctors, patients, appointments..."
                   className="pl-10"

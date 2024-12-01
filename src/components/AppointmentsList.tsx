@@ -81,11 +81,24 @@ const AppointmentsList = () => {
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime);
-    // Add 8 hours for GMT+8
-    date.setHours(date.getHours() + 8);
+    // Convert to Philippines timezone (UTC+8)
+    const options = {
+      timeZone: 'Asia/Manila',
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    } as Intl.DateTimeFormatOptions;
+    
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const formattedDate = formatter.format(date);
+    const [dayOfWeek, month, day, time] = formattedDate.split(', ');
+    
     return {
-      date: format(date, "EEEE, MMM d"),
-      time: format(date, "h:mm a")
+      date: `${dayOfWeek}, ${month} ${day}`,
+      time: time
     };
   };
 
