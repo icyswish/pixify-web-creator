@@ -27,7 +27,11 @@ export const AppointmentSection = ({
       {appointments.map((appointment) => (
         <AppointmentListItem
           key={appointment.id}
-          appointment={appointment}
+          id={appointment.id}
+          patient_name={appointment.patient_name}
+          datetime={appointment.datetime}
+          type={appointment.type}
+          is_completed={appointment.is_completed}
           onDelete={onDelete}
           onComplete={onComplete}
         />
