@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Trash2 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import AddAppointmentDialog from "@/components/AddAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +57,28 @@ const Appointments = () => {
     setSearchResults(data || []);
   };
 
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete appointment",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Appointment deleted successfully",
+    });
+    fetchAppointments();
+  };
+
   useEffect(() => {
     document.title = "Appointments | Dr Cloud";
   }, []);
@@ -99,14 +122,23 @@ const Appointments = () => {
                     <h3 className="font-medium">{appointment.patient_name}</h3>
                     <p className="text-sm text-gray-500">{appointment.type}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">
-                      {new Date(appointment.datetime).toLocaleString('en-US', {
-                        timeZone: 'Asia/Manila',
-                        dateStyle: 'full',
-                        timeStyle: 'short'
-                      })}
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        {new Date(appointment.datetime).toLocaleString('en-US', {
+                          timeZone: 'Asia/Manila',
+                          dateStyle: 'full',
+                          timeStyle: 'short'
+                        })}
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDelete(appointment.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </Card>
