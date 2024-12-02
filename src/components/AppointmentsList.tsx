@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle } from "lucide-react";
-import { format, addHours } from "date-fns";
-import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Appointment {
   id: string;
@@ -15,13 +12,12 @@ interface Appointment {
 }
 
 const AppointmentsList = () => {
-  const { toast } = useToast();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAppointments();
-    
-    const channel = supabase
+    const subscription = supabase
       .channel('appointments_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
         fetchAppointments();
@@ -29,7 +25,7 @@ const AppointmentsList = () => {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -58,28 +54,6 @@ const AppointmentsList = () => {
     setAppointments(data || []);
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('appointments')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete appointment",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Appointment deleted successfully",
-    });
-    fetchAppointments();
-  };
-
   const handleComplete = async (id: string) => {
     const { error } = await supabase
       .from('appointments')
@@ -102,63 +76,62 @@ const AppointmentsList = () => {
     fetchAppointments();
   };
 
-  const formatDateTime = (datetime: string) => {
-    // Convert UTC to local time and add 8 hours for Philippines timezone
-    const date = new Date(datetime);
-    const adjustedDate = addHours(date, 8);
-    
-    const formattedDate = format(adjustedDate, 'EEEE, MMM d');
-    const formattedTime = format(adjustedDate, 'h:mm a');
-    
-    return {
-      date: formattedDate,
-      time: formattedTime
-    };
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete appointment",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Appointment deleted successfully",
+    });
+    fetchAppointments();
   };
 
   return (
     <div className="space-y-4">
-      {appointments.map((appointment) => {
-        const { date, time } = formatDateTime(appointment.datetime);
-        return (
-          <Card key={appointment.id} className="p-4 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">{appointment.patient_name}</h3>
-                <p className="text-sm text-gray-500">{appointment.type}</p>
-                {appointment.is_completed && (
-                  <span className="text-sm text-green-500">Completed</span>
-                )}
-              </div>
-              <div className="text-right flex items-center gap-4">
-                <div>
-                  <p className="font-medium">{date}</p>
-                  <p className="text-sm text-gray-500">{time}</p>
-                </div>
-                <div className="flex gap-2">
-                  {!appointment.is_completed && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleComplete(appointment.id)}
-                      className="text-green-500 hover:text-green-600"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDelete(appointment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+      {appointments.map((appointment) => (
+        <div key={appointment.id} className="p-4 border rounded-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-medium">{appointment.patient_name}</h3>
+              <p className="text-sm text-gray-500">{appointment.type}</p>
+              <p className="text-sm text-gray-500">
+                {format(new Date(appointment.datetime), 'MMM dd, yyyy')}
+              </p>
             </div>
-          </Card>
-        );
-      })}
+            <div className="space-x-2">
+              {!appointment.is_completed && (
+                <button
+                  onClick={() => handleComplete(appointment.id)}
+                  className="text-sm text-blue-500 hover:text-blue-700"
+                >
+                  Complete
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(appointment.id)}
+                className="text-sm text-red-500 hover:text-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      {appointments.length === 0 && (
+        <p className="text-center text-gray-500">No appointments for today</p>
+      )}
     </div>
   );
 };

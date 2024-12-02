@@ -1,62 +1,53 @@
 import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle } from "lucide-react";
-import { format, subHours } from "date-fns";
+import { format } from "date-fns";
 
-interface Appointment {
+interface AppointmentListItemProps {
   id: string;
   patient_name: string;
   datetime: string;
   type: string;
   is_completed?: boolean;
-}
-
-interface AppointmentListItemProps {
-  appointment: Appointment;
   onDelete: (id: string) => void;
   onComplete: (id: string) => void;
 }
 
-export const AppointmentListItem = ({ 
-  appointment, 
-  onDelete, 
-  onComplete 
+export const AppointmentListItem = ({
+  id,
+  patient_name,
+  datetime,
+  type,
+  is_completed,
+  onDelete,
+  onComplete
 }: AppointmentListItemProps) => {
-  const formatDateTime = (datetime: string) => {
-    const date = new Date(datetime);
-    const adjustedDate = subHours(date, 8);
-    return format(adjustedDate, 'h:mm a');
-  };
+  const date = format(new Date(datetime), 'MMM dd, yyyy');
 
   return (
-    <div className="p-4 border rounded-lg flex justify-between items-center">
-      <div>
-        <h4 className="font-medium">{appointment.patient_name}</h4>
-        <p className="text-sm text-gray-500">
-          {formatDateTime(appointment.datetime)}
-        </p>
-        <p className="text-sm text-gray-500">{appointment.type}</p>
-        {appointment.is_completed && (
-          <span className="text-sm text-green-500">Completed</span>
-        )}
-      </div>
-      <div className="flex gap-2">
-        {!appointment.is_completed && (
+    <div className="p-4 border rounded-lg">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <h3 className="font-medium">{patient_name}</h3>
+          <p className="text-sm text-gray-500">{type}</p>
+          <p className="text-sm text-gray-500">{date}</p>
+        </div>
+        <div className="space-x-2">
+          {!is_completed && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onComplete(id)}
+            >
+              Complete
+            </Button>
+          )}
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onComplete(appointment.id)}
-            className="text-green-500 hover:text-green-600"
+            variant="destructive"
+            size="sm"
+            onClick={() => onDelete(id)}
           >
-            <CheckCircle className="h-4 w-4" />
+            Delete
           </Button>
-        )}
-        <Button
-          variant="destructive"
-          size="icon"
-          onClick={() => onDelete(appointment.id)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        </div>
       </div>
     </div>
   );
