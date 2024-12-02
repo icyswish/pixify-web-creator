@@ -4,11 +4,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle } from "lucide-react";
-import { format, subHours } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AppointmentSection } from "./AppointmentSection";
 
 interface Appointment {
   id: string;
@@ -77,16 +75,12 @@ export const AppointmentDialog = ({
     onAppointmentDeleted();
   };
 
-  const formatDateTime = (datetime: string) => {
-    const date = new Date(datetime);
-    // Subtract 8 hours for Philippines timezone in Appointment Status
-    const adjustedDate = subHours(date, 8);
-    return format(adjustedDate, 'h:mm a');
-  };
-
   const isAppointmentFinished = (datetime: string) => {
     return new Date(datetime) < new Date();
   };
+
+  const finishedAppointments = appointments.filter(app => isAppointmentFinished(app.datetime));
+  const upcomingAppointments = appointments.filter(app => !isAppointmentFinished(app.datetime));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,82 +89,18 @@ export const AppointmentDialog = ({
           <DialogTitle>Today's Appointments Status</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="font-medium">Finished Appointments</h3>
-            {appointments
-              .filter(app => isAppointmentFinished(app.datetime))
-              .map((appointment) => (
-                <div key={appointment.id} className="p-4 border rounded-lg bg-gray-50 flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium">{appointment.patient_name}</h4>
-                    <p className="text-sm text-gray-500">
-                      {formatDateTime(appointment.datetime)}
-                    </p>
-                    <p className="text-sm text-gray-500">{appointment.type}</p>
-                    {appointment.is_completed && (
-                      <span className="text-sm text-green-500">Completed</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {!appointment.is_completed && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleComplete(appointment.id)}
-                        className="text-green-500 hover:text-green-600"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleDeleteAppointment(appointment.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-          </div>
-          <div className="space-y-2">
-            <h3 className="font-medium">Upcoming Appointments</h3>
-            {appointments
-              .filter(app => !isAppointmentFinished(app.datetime))
-              .map((appointment) => (
-                <div key={appointment.id} className="p-4 border rounded-lg flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium">{appointment.patient_name}</h4>
-                    <p className="text-sm text-gray-500">
-                      {formatDateTime(appointment.datetime)}
-                    </p>
-                    <p className="text-sm text-gray-500">{appointment.type}</p>
-                    {appointment.is_completed && (
-                      <span className="text-sm text-green-500">Completed</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {!appointment.is_completed && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleComplete(appointment.id)}
-                        className="text-green-500 hover:text-green-600"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleDeleteAppointment(appointment.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-          </div>
+          <AppointmentSection
+            title="Finished Appointments"
+            appointments={finishedAppointments}
+            onDelete={handleDeleteAppointment}
+            onComplete={handleComplete}
+          />
+          <AppointmentSection
+            title="Upcoming Appointments"
+            appointments={upcomingAppointments}
+            onDelete={handleDeleteAppointment}
+            onComplete={handleComplete}
+          />
         </div>
       </DialogContent>
     </Dialog>
