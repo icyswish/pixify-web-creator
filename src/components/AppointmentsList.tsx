@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, CheckCircle } from "lucide-react";
-import { format, subHours } from "date-fns";
+import { format, addHours } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -103,9 +103,9 @@ const AppointmentsList = () => {
   };
 
   const formatDateTime = (datetime: string) => {
-    // Convert UTC to local time and subtract 8 hours
+    // Convert UTC to local time and add 8 hours for Philippines timezone
     const date = new Date(datetime);
-    const adjustedDate = subHours(date, 8);
+    const adjustedDate = addHours(date, 8);
     
     const formattedDate = format(adjustedDate, 'EEEE, MMM d');
     const formattedTime = format(adjustedDate, 'h:mm a');

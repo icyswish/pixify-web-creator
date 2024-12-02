@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2, CheckCircle } from "lucide-react";
-import { format, addHours } from "date-fns";
+import { format, subHours } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -79,8 +79,8 @@ export const AppointmentDialog = ({
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime);
-    // Add 8 hours for Philippines timezone
-    const adjustedDate = addHours(date, 8);
+    // Subtract 8 hours for Philippines timezone in Appointment Status
+    const adjustedDate = subHours(date, 8);
     return format(adjustedDate, 'h:mm a');
   };
 
