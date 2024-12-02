@@ -15,6 +15,7 @@ export type Database = {
           created_by: string
           datetime: string
           id: string
+          is_completed: boolean | null
           patient_name: string
           type: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           created_by: string
           datetime: string
           id?: string
+          is_completed?: boolean | null
           patient_name: string
           type: string
         }
@@ -31,6 +33,7 @@ export type Database = {
           created_by?: string
           datetime?: string
           id?: string
+          is_completed?: boolean | null
           patient_name?: string
           type?: string
         }

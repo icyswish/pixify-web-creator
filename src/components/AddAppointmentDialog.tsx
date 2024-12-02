@@ -46,7 +46,8 @@ const AddAppointmentDialog = () => {
           patient_name: name,
           datetime: utcDate.toISOString(),
           type,
-          created_by: session.session.user.id
+          created_by: session.session.user.id,
+          is_completed: false
         }
       ]);
 

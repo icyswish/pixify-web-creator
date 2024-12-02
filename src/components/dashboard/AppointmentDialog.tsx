@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckCircle } from "lucide-react";
 import { format, subHours } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ interface Appointment {
   patient_name: string;
   datetime: string;
   type: string;
+  is_completed?: boolean;
 }
 
 interface AppointmentDialogProps {
@@ -54,6 +55,28 @@ export const AppointmentDialog = ({
     onAppointmentDeleted();
   };
 
+  const handleComplete = async (id: string) => {
+    const { error } = await supabase
+      .from('appointments')
+      .update({ is_completed: true })
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to mark appointment as complete",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Appointment marked as complete",
+    });
+    onAppointmentDeleted();
+  };
+
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime);
     // Subtract 8 hours for Philippines timezone
@@ -84,14 +107,29 @@ export const AppointmentDialog = ({
                       {formatDateTime(appointment.datetime)}
                     </p>
                     <p className="text-sm text-gray-500">{appointment.type}</p>
+                    {appointment.is_completed && (
+                      <span className="text-sm text-green-500">Completed</span>
+                    )}
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDeleteAppointment(appointment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {!appointment.is_completed && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleComplete(appointment.id)}
+                        className="text-green-500 hover:text-green-600"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDeleteAppointment(appointment.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
           </div>
@@ -107,14 +145,29 @@ export const AppointmentDialog = ({
                       {formatDateTime(appointment.datetime)}
                     </p>
                     <p className="text-sm text-gray-500">{appointment.type}</p>
+                    {appointment.is_completed && (
+                      <span className="text-sm text-green-500">Completed</span>
+                    )}
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDeleteAppointment(appointment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {!appointment.is_completed && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleComplete(appointment.id)}
+                        className="text-green-500 hover:text-green-600"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDeleteAppointment(appointment.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
           </div>
