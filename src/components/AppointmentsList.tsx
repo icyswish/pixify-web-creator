@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Appointment {
   id: string;
@@ -14,6 +24,8 @@ interface Appointment {
 const AppointmentsList = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -54,6 +66,36 @@ const AppointmentsList = () => {
     setAppointments(data || []);
   };
 
+  const handleDeleteClick = (id: string) => {
+    setAppointmentToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!appointmentToDelete) return;
+
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', appointmentToDelete);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete appointment",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Appointment deleted successfully",
+    });
+    setDeleteDialogOpen(false);
+    fetchAppointments();
+  };
+
   const handleComplete = async (id: string) => {
     const { error } = await supabase
       .from('appointments')
@@ -76,28 +118,6 @@ const AppointmentsList = () => {
     fetchAppointments();
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('appointments')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete appointment",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Appointment deleted successfully",
-    });
-    fetchAppointments();
-  };
-
   return (
     <div className="space-y-4">
       {appointments.map((appointment) => (
@@ -109,6 +129,11 @@ const AppointmentsList = () => {
               <p className="text-sm text-gray-500">
                 {format(new Date(appointment.datetime), 'MMM dd, yyyy')}
               </p>
+              {appointment.is_completed && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Completed
+                </span>
+              )}
             </div>
             <div className="space-x-2">
               {!appointment.is_completed && (
@@ -120,7 +145,7 @@ const AppointmentsList = () => {
                 </button>
               )}
               <button
-                onClick={() => handleDelete(appointment.id)}
+                onClick={() => handleDeleteClick(appointment.id)}
                 className="text-sm text-red-500 hover:text-red-700"
               >
                 Delete
@@ -132,6 +157,21 @@ const AppointmentsList = () => {
       {appointments.length === 0 && (
         <p className="text-center text-gray-500">No appointments for today</p>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the appointment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
