@@ -7,6 +7,16 @@ import Sidebar from "@/components/Sidebar";
 import AddAppointmentDialog from "@/components/AddAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Appointment {
   id: string;
@@ -22,11 +32,12 @@ const Appointments = () => {
   const [searchResults, setSearchResults] = useState<Appointment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAppointments();
     
-    // Subscribe to realtime changes
     const subscription = supabase
       .channel('appointments_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
@@ -70,11 +81,18 @@ const Appointments = () => {
     setSearchResults(data || []);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    setAppointmentToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!appointmentToDelete) return;
+
     const { error } = await supabase
       .from('appointments')
       .delete()
-      .eq('id', id);
+      .eq('id', appointmentToDelete);
 
     if (error) {
       toast({
@@ -89,6 +107,7 @@ const Appointments = () => {
       title: "Success",
       description: "Appointment deleted successfully",
     });
+    setDeleteDialogOpen(false);
     fetchAppointments();
   };
 
@@ -163,6 +182,21 @@ const Appointments = () => {
           </div>
         </main>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the appointment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

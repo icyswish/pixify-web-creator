@@ -7,6 +7,17 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AppointmentSection } from "./AppointmentSection";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface Appointment {
   id: string;
@@ -30,12 +41,21 @@ export const AppointmentDialog = ({
   onAppointmentDeleted 
 }: AppointmentDialogProps) => {
   const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
 
   const handleDeleteAppointment = async (id: string) => {
+    setAppointmentToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!appointmentToDelete) return;
+
     const { error } = await supabase
       .from('appointments')
       .delete()
-      .eq('id', id);
+      .eq('id', appointmentToDelete);
 
     if (error) {
       toast({
@@ -50,6 +70,7 @@ export const AppointmentDialog = ({
       title: "Success",
       description: "Appointment deleted successfully",
     });
+    setDeleteDialogOpen(false);
     onAppointmentDeleted();
   };
 
@@ -83,26 +104,43 @@ export const AppointmentDialog = ({
   const upcomingAppointments = appointments.filter(app => !isAppointmentFinished(app.datetime));
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Today's Appointments Status</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <AppointmentSection
-            title="Finished Appointments"
-            appointments={finishedAppointments}
-            onDelete={handleDeleteAppointment}
-            onComplete={handleComplete}
-          />
-          <AppointmentSection
-            title="Upcoming Appointments"
-            appointments={upcomingAppointments}
-            onDelete={handleDeleteAppointment}
-            onComplete={handleComplete}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Today's Appointments Status</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <AppointmentSection
+              title="Finished Appointments"
+              appointments={finishedAppointments}
+              onDelete={handleDeleteAppointment}
+              onComplete={handleComplete}
+            />
+            <AppointmentSection
+              title="Upcoming Appointments"
+              appointments={upcomingAppointments}
+              onDelete={handleDeleteAppointment}
+              onComplete={handleComplete}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the appointment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
