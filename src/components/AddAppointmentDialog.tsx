@@ -41,7 +41,14 @@ const AddAppointmentDialog = () => {
     }
 
     const { data: session } = await supabase.auth.getSession();
-    if (!session.session?.user.id) return;
+    if (!session.session?.user.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to schedule an appointment.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Convert the local datetime to UTC and subtract 8 hours
     const localDate = new Date(datetime);
@@ -61,6 +68,7 @@ const AddAppointmentDialog = () => {
       ]);
 
     if (error) {
+      console.error('Error adding appointment:', error);
       toast({
         title: "Error",
         description: "Failed to schedule appointment. Please try again.",

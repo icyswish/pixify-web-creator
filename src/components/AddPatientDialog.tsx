@@ -23,7 +23,14 @@ const AddPatientDialog = () => {
     e.preventDefault();
     
     const { data: session } = await supabase.auth.getSession();
-    if (!session.session?.user.id) return;
+    if (!session.session?.user.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add a patient.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from('patients')
@@ -36,6 +43,7 @@ const AddPatientDialog = () => {
       ]);
 
     if (error) {
+      console.error('Error adding patient:', error);
       toast({
         title: "Error",
         description: "Failed to add patient. Please try again.",
