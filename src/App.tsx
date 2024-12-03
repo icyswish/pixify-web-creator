@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
@@ -55,6 +56,12 @@ const App = () => {
 
   // Protected Route component
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const location = useLocation();
+    
+    useEffect(() => {
+      document.title = `${location.pathname.slice(1).charAt(0).toUpperCase() + location.pathname.slice(2)} | Dr Cloud`;
+    }, [location]);
+
     if (isLoading) {
       return <div>Loading...</div>;
     }
@@ -79,6 +86,9 @@ const App = () => {
               <Routes>
                 <Route path="/" element={
                   isAuthenticated ? <Navigate to="/dashboard" /> : <Login />
+                } />
+                <Route path="/signup" element={
+                  isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />
                 } />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>

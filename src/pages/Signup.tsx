@@ -7,30 +7,42 @@ import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Login | Dr Cloud Management";
+    document.title = "Sign Up | Dr Cloud Management";
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
       });
 
       if (error) throw error;
 
-      navigate("/dashboard");
+      toast({
+        title: "Success",
+        description: "Please check your email to verify your account.",
+      });
+      
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -39,33 +51,6 @@ const Login = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Password reset instructions have been sent to your email",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -80,10 +65,19 @@ const Login = () => {
               className="h-12 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Login to Dr Cloud Management</CardTitle>
+          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6">
+            <div>
+              <Input
+                type="text"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
             <div>
               <Input
                 type="email"
@@ -113,20 +107,13 @@ const Login = () => {
                 )}
               </button>
             </div>
-            <div className="flex justify-between items-center text-sm">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-primary hover:underline"
-              >
-                Forgot password?
-              </button>
-              <Link to="/signup" className="text-primary hover:underline">
-                Sign up
+            <div className="text-sm text-center">
+              <Link to="/" className="text-primary hover:underline">
+                Already have an account? Sign in
               </Link>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
         </CardContent>
@@ -135,4 +122,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

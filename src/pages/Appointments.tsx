@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, CheckCircle2 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import AddAppointmentDialog from "@/components/AddAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ interface Appointment {
   patient_name: string;
   datetime: string;
   type: string;
+  is_completed?: boolean;
 }
 
 const Appointments = () => {
@@ -24,6 +25,18 @@ const Appointments = () => {
 
   useEffect(() => {
     fetchAppointments();
+    
+    // Subscribe to realtime changes
+    const subscription = supabase
+      .channel('appointments_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        fetchAppointments();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -121,17 +134,21 @@ const Appointments = () => {
                   <div>
                     <h3 className="font-medium">{appointment.patient_name}</h3>
                     <p className="text-sm text-gray-500">{appointment.type}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(appointment.datetime).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    {appointment.is_completed && (
+                      <div className="flex items-center gap-1 text-green-600 mt-1">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm">Completed</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        {new Date(appointment.datetime).toLocaleString('en-US', {
-                          timeZone: 'Asia/Manila',
-                          dateStyle: 'full',
-                          timeStyle: 'short'
-                        })}
-                      </p>
-                    </div>
                     <Button
                       variant="destructive"
                       size="icon"
