@@ -31,6 +31,15 @@ const AddAppointmentDialog = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!type) {
+      toast({
+        title: "Error",
+        description: "Please select a type of appointment",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const { data: session } = await supabase.auth.getSession();
     if (!session.session?.user.id) return;
 

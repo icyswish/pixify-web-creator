@@ -7,6 +7,16 @@ import Sidebar from "@/components/Sidebar";
 import AddPatientDialog from "@/components/AddPatientDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Patient {
   id: string;
@@ -21,6 +31,8 @@ const Patients = () => {
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPatients();
@@ -56,11 +68,18 @@ const Patients = () => {
     setSearchResults(data || []);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    setPatientToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!patientToDelete) return;
+
     const { error } = await supabase
       .from('patients')
       .delete()
-      .eq('id', id);
+      .eq('id', patientToDelete);
 
     if (error) {
       toast({
@@ -75,6 +94,7 @@ const Patients = () => {
       title: "Success",
       description: "Patient deleted successfully",
     });
+    setDeleteDialogOpen(false);
     fetchPatients();
   };
 
@@ -135,6 +155,21 @@ const Patients = () => {
           </div>
         </main>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the patient's record.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -7,6 +7,16 @@ import { useToast } from "@/components/ui/use-toast";
 import Sidebar from "@/components/Sidebar";
 import AddDoctorDialog from "@/components/AddDoctorDialog";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Doctor {
   id: string;
@@ -21,6 +31,8 @@ const Doctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchResults, setSearchResults] = useState<Doctor[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [doctorToDelete, setDoctorToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDoctors();
@@ -56,11 +68,18 @@ const Doctors = () => {
     setSearchResults(data || []);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
+    setDoctorToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!doctorToDelete) return;
+
     const { error } = await supabase
       .from('doctors')
       .delete()
-      .eq('id', id);
+      .eq('id', doctorToDelete);
 
     if (error) {
       toast({
@@ -75,6 +94,7 @@ const Doctors = () => {
       title: "Doctor removed",
       description: "The doctor has been successfully removed from the system.",
     });
+    setDeleteDialogOpen(false);
     fetchDoctors();
   };
 
@@ -139,6 +159,21 @@ const Doctors = () => {
           </div>
         </main>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently remove the doctor from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
