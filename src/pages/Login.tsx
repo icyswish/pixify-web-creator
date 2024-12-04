@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSendingReset, setIsSendingReset] = useState(false);
-
-  useEffect(() => {
-    document.title = "Login | Dr Cloud Management";
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +38,7 @@ const Login = () => {
     }
   };
 
-  const handleForgotPassword = async () => {
+  const handleForgotPassword = () => {
     if (!email) {
       toast({
         title: "Error",
@@ -53,27 +48,9 @@ const Login = () => {
       return;
     }
 
-    setIsSendingReset(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Password reset instructions have been sent to your email. Please check your inbox.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingReset(false);
-    }
+    // Store email in localStorage for the reset password page
+    localStorage.setItem('resetPasswordEmail', email);
+    navigate("/reset-password");
   };
 
   return (
@@ -125,10 +102,9 @@ const Login = () => {
                 type="button"
                 variant="ghost"
                 onClick={handleForgotPassword}
-                disabled={isSendingReset}
                 className="text-primary hover:underline p-0"
               >
-                {isSendingReset ? "Sending..." : "Forgot password?"}
+                Forgot password?
               </Button>
               <Link to="/signup" className="text-primary hover:underline">
                 Sign up
