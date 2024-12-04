@@ -14,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   useEffect(() => {
     document.title = "Login | Dr Cloud Management";
@@ -52,13 +53,17 @@ const Login = () => {
       return;
     }
 
+    setIsSendingReset(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Password reset instructions have been sent to your email",
+        description: "Password reset instructions have been sent to your email. Please check your inbox.",
       });
     } catch (error: any) {
       toast({
@@ -66,6 +71,8 @@ const Login = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSendingReset(false);
     }
   };
 
@@ -114,13 +121,15 @@ const Login = () => {
               </button>
             </div>
             <div className="flex justify-between items-center text-sm">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={handleForgotPassword}
-                className="text-primary hover:underline"
+                disabled={isSendingReset}
+                className="text-primary hover:underline p-0"
               >
-                Forgot password?
-              </button>
+                {isSendingReset ? "Sending..." : "Forgot password?"}
+              </Button>
               <Link to="/signup" className="text-primary hover:underline">
                 Sign up
               </Link>
