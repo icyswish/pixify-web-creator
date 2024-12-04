@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,24 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Check if we have a session when the component mounts
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      // If no session, the reset link might be invalid or expired
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "Invalid or expired reset link. Please request a new password reset.",
+          variant: "destructive",
+        });
+        navigate("/");
+      }
+    };
+
+    checkSession();
+  }, [navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +63,11 @@ const ResetPassword = () => {
 
       toast({
         title: "Success",
-        description: "Your password has been reset successfully",
+        description: "Your password has been reset successfully. Please log in with your new password.",
       });
       
+      // Sign out the user after password reset
+      await supabase.auth.signOut();
       navigate("/");
     } catch (error: any) {
       toast({
@@ -67,6 +87,9 @@ const ResetPassword = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Reset your password
           </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Enter your new password below
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
           <div className="space-y-4">
