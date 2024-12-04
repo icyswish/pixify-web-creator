@@ -53,15 +53,12 @@ const ResetPassword = () => {
       const email = localStorage.getItem('resetPasswordEmail');
       if (!email) throw new Error("Email not found");
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-
-      // Update the password
-      const { error: updateError } = await supabase.auth.updateUser({
+      // Update the user's password in Supabase
+      const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       localStorage.removeItem('resetPasswordEmail');
       
@@ -70,6 +67,8 @@ const ResetPassword = () => {
         description: "Your password has been reset successfully. Please log in with your new password.",
       });
       
+      // Sign out the user and redirect to login page
+      await supabase.auth.signOut();
       navigate("/");
     } catch (error: any) {
       toast({
