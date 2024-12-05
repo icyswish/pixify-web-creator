@@ -50,6 +50,9 @@ const ResetPassword = () => {
 
     setIsLoading(true);
     try {
+      const email = localStorage.getItem('resetPasswordEmail');
+      if (!email) throw new Error("Email not found");
+
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
