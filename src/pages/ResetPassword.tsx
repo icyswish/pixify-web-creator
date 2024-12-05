@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,11 +16,12 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const email = localStorage.getItem('resetPasswordEmail');
-    if (!email) {
+    // Check if we have the hash fragment from the reset password email
+    const hashFragment = window.location.hash;
+    if (!hashFragment) {
       toast({
         title: "Error",
-        description: "Please start the password reset process from the login page.",
+        description: "Invalid password reset link. Please request a new one.",
         variant: "destructive",
       });
       navigate("/");
@@ -50,17 +51,12 @@ const ResetPassword = () => {
 
     setIsLoading(true);
     try {
-      const email = localStorage.getItem('resetPasswordEmail');
-      if (!email) throw new Error("Email not found");
-
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
       if (error) throw error;
 
-      localStorage.removeItem('resetPasswordEmail');
-      
       toast({
         title: "Success",
         description: "Your password has been updated successfully. Please log in with your new password.",
