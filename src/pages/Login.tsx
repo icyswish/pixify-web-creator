@@ -53,7 +53,10 @@ const Login = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Reset password error details:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -61,9 +64,14 @@ const Login = () => {
       });
     } catch (error: any) {
       console.error('Reset password error:', error);
+      // More specific error message based on the error type
+      const errorMessage = error.message === "Email rate limit exceeded" 
+        ? "Please wait a few minutes before requesting another reset email"
+        : error.message;
+        
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
