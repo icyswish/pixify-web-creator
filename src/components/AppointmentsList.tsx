@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Appointment {
   id: string;
@@ -26,14 +28,25 @@ const AppointmentsList = () => {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
+    
+    // Subscribe to real-time changes
     const subscription = supabase
       .channel('appointments_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
-        fetchAppointments();
-      })
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'appointments' 
+        }, 
+        () => {
+          console.log('Received real-time update');
+          fetchAppointments();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -47,23 +60,36 @@ const AppointmentsList = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .gte('datetime', today.toISOString())
-      .lt('datetime', tomorrow.toISOString())
-      .order('datetime', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .gte('datetime', today.toISOString())
+        .lt('datetime', tomorrow.toISOString())
+        .order('datetime', { ascending: true });
 
-    if (error) {
+      if (error) throw error;
+
+      console.log('Fetched appointments:', data);
+      setAppointments(data || []);
+    } catch (error: any) {
+      console.error('Error fetching appointments:', error);
       toast({
         title: "Error",
         description: "Failed to fetch appointments",
         variant: "destructive"
       });
-      return;
     }
+  };
 
-    setAppointments(data || []);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchAppointments();
+    setIsRefreshing(false);
+    toast({
+      title: "Success",
+      description: "Appointments refreshed successfully",
+    });
   };
 
   const handleDeleteClick = (id: string) => {
@@ -93,7 +119,7 @@ const AppointmentsList = () => {
       description: "Appointment deleted successfully",
     });
     setDeleteDialogOpen(false);
-    fetchAppointments();
+    await fetchAppointments();
   };
 
   const handleComplete = async (id: string) => {
@@ -115,11 +141,22 @@ const AppointmentsList = () => {
       title: "Success",
       description: "Appointment marked as complete",
     });
-    fetchAppointments();
+    await fetchAppointments();
   };
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+      
       {appointments.map((appointment) => (
         <div key={appointment.id} className="p-4 border rounded-lg">
           <div className="flex justify-between items-start">

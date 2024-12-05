@@ -55,13 +55,12 @@ const Login = () => {
 
       if (error) throw error;
 
-      localStorage.setItem('resetPasswordEmail', email);
-      
       toast({
         title: "Success",
         description: "Password reset instructions have been sent to your email",
       });
     } catch (error: any) {
+      console.error('Reset password error:', error);
       toast({
         title: "Error",
         description: error.message,
