@@ -50,6 +50,10 @@ const Login = () => {
 
     // Store email in localStorage for the reset password page
     localStorage.setItem('resetPasswordEmail', email);
+    toast({
+      title: "Success",
+      description: "Password reset instructions have been sent to your email",
+    });
     navigate("/reset-password");
   };
 

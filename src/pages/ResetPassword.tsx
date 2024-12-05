@@ -50,10 +50,6 @@ const ResetPassword = () => {
 
     setIsLoading(true);
     try {
-      const email = localStorage.getItem('resetPasswordEmail');
-      if (!email) throw new Error("Email not found");
-
-      // Update the user's password in Supabase
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -64,7 +60,7 @@ const ResetPassword = () => {
       
       toast({
         title: "Success",
-        description: "Your password has been reset successfully. Please log in with your new password.",
+        description: "Your password has been updated successfully. Please log in with your new password.",
       });
       
       // Sign out the user and redirect to login page
